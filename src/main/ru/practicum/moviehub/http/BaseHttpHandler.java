@@ -21,7 +21,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
     protected static final String TITLE_SHOULD_NOT_BE_EMPTY = "название не должно быть пустым";
     protected static final String TOO_LONG_MOVIE_TITLE = "название не должно превышать 100 символов";
     protected static final String YEAR_SHOULD_BE_BETWEEN = "год должен быть между 1888 и %d"
-            .formatted(LocalDate.now().getYear()+1);
+            .formatted(LocalDate.now().getYear() + 1);
 
     public void sendJson(HttpExchange exchange, int status, String json) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", CT_JSON);
