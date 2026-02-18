@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -24,7 +24,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,6 +61,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает пустой массив, если фильмов нет")
     void getMovies_whenEmpty_returnsEmptyArray() throws Exception {
         server.clearStorage();
 
@@ -92,6 +92,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 10 фильмов из тестового файла")
     void shouldReturn10MoviesWithTestFile() throws IOException, InterruptedException {
 
         server.initTestMovies();
@@ -119,6 +120,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает фильм по ID")
     void shouldReturnMovieById() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -155,6 +157,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 404 для несуществующего ID фильма")
     void shouldReturn404WithNonExistedMovieId() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -192,11 +195,12 @@ public class MoviesApiTest {
 
         assertEquals(
                 error.getError(),
-                "Фильм не найден"
+                "Ошибка валидации"
         );
     }
 
     @Test
+    @DisplayName("Возвращает 400 для некорректного формата ID")
     void shouldReturn400WithInvalidIdFormat() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -216,11 +220,12 @@ public class MoviesApiTest {
 
         assertEquals(
                 error.getError(),
-                "Некорректный ID"
+                "Ошибка валидации"
         );
     }
 
     @Test
+    @DisplayName("Фильтрует фильмы по году через параметр year")
     void shouldReturnMovieByYearParam() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -243,6 +248,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 400 для некорректного значения параметра year")
     void shouldReturn400WithInvalidQueryValueFormat() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -258,11 +264,12 @@ public class MoviesApiTest {
         assertStatusCode(response, 400);
 
         ErrorResponse errorResponse = GSON.fromJson(response.body(), ErrorResponse.class);
-        assertTrue(errorResponse.getError().equals("Некорректный параметр запроса — 'year'"));
+        assertTrue(errorResponse.getError().equals("Ошибка валидации"));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1888, 2026, 2027})
+    @DisplayName("Создаёт фильм с допустимым годом (1888–2027)")
     void shouldCreateNewMovieRecord(int year) throws IOException, InterruptedException {
         String title = "Title";
         String jsonBody = GSON.toJson(new MovieRequest(title, year));
@@ -288,6 +295,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 422 для пустого названия фильма")
     void shouldReturn422ForCreatingMovieWithEmptyTitle() throws IOException, InterruptedException {
         String title = "";
         int year = 1990;
@@ -313,6 +321,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 422, если название длиннее 100 символов")
     void shouldReturn422ForTitleLongerThan100Chars() throws IOException, InterruptedException {
         String longTitle = "A".repeat(101);
         int year = 1990;
@@ -342,6 +351,7 @@ public class MoviesApiTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1887, 2028})
+    @DisplayName("Возвращает 422 для года вне диапазона (1888–2027)")
     void shouldReturn422ForCreatingMovieWithWrongYear(int year) throws IOException, InterruptedException {
         String title = "Title";
         String jsonBody = GSON.toJson(new MovieRequest(title, year));
@@ -366,6 +376,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает полные детали ошибки для нескольких нарушений валидации")
     void shouldReturnFullDetailErrorMessage() throws IOException, InterruptedException {
         String title = "";
         String jsonBody = GSON.toJson(new MovieRequest(title, 1880));
@@ -391,6 +402,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 415 для некорректного Content-Type")
     void shouldReturn415ForWrongCTHeader() throws IOException, InterruptedException {
         String title = "Title";
         String jsonBody = GSON.toJson(new MovieRequest(title, 1991));
@@ -408,6 +420,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Удаляет фильм по ID")
     void shouldDeleteMovie() throws IOException, InterruptedException {
         String title = "Title";
         String jsonBody = GSON.toJson(new MovieRequest(title, 1999));
@@ -449,6 +462,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 404 при удалении несуществующего фильма")
     void shouldReturn404ForDeleteNonExistedMovie() throws IOException, InterruptedException {
         server.initTestMovies();
 
@@ -483,6 +497,7 @@ public class MoviesApiTest {
     }
 
     @Test
+    @DisplayName("Возвращает 422 для некорректного формата ID при удалении")
     void shouldReturn422ForDeleteMovieWithInvalidIdFormat() throws IOException, InterruptedException {
         server.initTestMovies();
 

@@ -135,7 +135,7 @@ public class MoviesHandler extends BaseHttpHandler {
             String json = GSON.toJson(movie);
             sendJson(exchange, 200, json);
         } catch (NoSuchElementException e) {
-            ErrorResponse noSuchMovieResponse = new ErrorResponse("Ошбика валидации");
+            ErrorResponse noSuchMovieResponse = new ErrorResponse("Ошибка валидации");
             noSuchMovieResponse.setDetails(List.of(NO_SUCH_MOVIE_RESPONSE));
             String json = GSON.toJson(noSuchMovieResponse);
             sendJson(exchange, 404, json);
