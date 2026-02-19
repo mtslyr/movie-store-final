@@ -17,6 +17,7 @@ public class MovieByIdHandler extends BaseHttpHandler {
     public MovieByIdHandler(MoviesServer server) {
         this.server = server;
     }
+
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         logRequest(exchange);
