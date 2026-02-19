@@ -148,10 +148,13 @@ public class MoviesHandler extends BaseHttpHandler {
     }
 
     private Map<String, String> resolveParams(HttpExchange exchange) {
-        String[] paramStr = exchange.getRequestURI().getQuery().split("=");
+        String query = exchange.getRequestURI().getQuery();
+        String[] paramStr = query.split("&");
         Map<String, String> params = new HashMap<>();
-        for (int i = 0; i < paramStr.length - 1; i = i + 2) {
-            params.put(paramStr[i], paramStr[i + 1]);
+        for (String q : paramStr) {
+            String paramName = q.split("=")[0];
+            String value = q.split("=")[1];
+            params.put(paramName, value);
         }
 
         return params;
