@@ -195,7 +195,7 @@ public class MoviesApiTest {
 
         assertEquals(
                 error.getError(),
-                "Ошибка валидации"
+                "Фильм с ID = %s найден".formatted(randomId)
         );
     }
 

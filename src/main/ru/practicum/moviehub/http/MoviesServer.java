@@ -5,6 +5,7 @@ import ru.practicum.moviehub.exception.EmptyMovieTitleException;
 import ru.practicum.moviehub.exception.IllegalMovieYearException;
 import ru.practicum.moviehub.exception.IllegalTitleAndYearException;
 import ru.practicum.moviehub.exception.TooLongMovieTitleException;
+import ru.practicum.moviehub.http.handler.MovieByIdHandler;
 import ru.practicum.moviehub.http.handler.MoviesHandler;
 import ru.practicum.moviehub.model.Movie;
 import ru.practicum.moviehub.model.MovieRequest;
@@ -22,10 +23,18 @@ public class MoviesServer {
 
     private final MoviesStore moviesStore;
     private final Map<String, BaseHttpHandler> handlers = Map.of(
-            "/movies", new MoviesHandler(this)
+            "/movies", new MoviesHandler(this),
+            "/movies/", new MovieByIdHandler(this)
 
     );
     private final HttpServer server;
+
+    private final Predicate<MovieRequest> validateMovieYear = request -> {
+        int curYear = LocalDate.now().getYear() + 1;
+        int year1888 = 1888;
+
+        return request.getYear() >= year1888 && request.getYear() <= curYear;
+    };
 
     public MoviesServer(MoviesStore moviesStore, int port) {
         try {
@@ -91,13 +100,6 @@ public class MoviesServer {
     public void initTestMovies() {
         this.moviesStore.initTestData();
     }
-
-    Predicate<MovieRequest> validateMovieYear = request -> {
-        int curYear = LocalDate.now().getYear() + 1;
-        int year1888 = 1888;
-
-        return request.getYear() >= year1888 && request.getYear() <= curYear;
-    };
 
     public void deleteMovie(String idStr) throws NumberFormatException, NoSuchElementException {
         int id = Integer.parseInt(idStr);
