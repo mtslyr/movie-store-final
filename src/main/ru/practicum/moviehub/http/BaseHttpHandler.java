@@ -26,7 +26,7 @@ public abstract class BaseHttpHandler implements HttpHandler {
     protected static final String YEAR_SHOULD_BE_BETWEEN = "год должен быть между 1888 и %d"
             .formatted(LocalDate.now().getYear() + 1);
 
-    protected Predicate<String> validateNumberFormat = s -> s.matches("\\d+");
+    protected Predicate<String> validateNumberFormat = s -> s.matches("-?\\d+");
 
     public void sendJson(HttpExchange exchange, int status, String json) throws IOException {
         exchange.getResponseHeaders().set("Content-Type", CT_JSON);
