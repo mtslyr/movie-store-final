@@ -1,7 +1,6 @@
 package ru.practicum.moviehub.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
-import ru.practicum.moviehub.api.ErrorResponse;
 import ru.practicum.moviehub.exception.EmptyMovieTitleException;
 import ru.practicum.moviehub.exception.IllegalMovieYearException;
 import ru.practicum.moviehub.exception.IllegalTitleAndYearException;
