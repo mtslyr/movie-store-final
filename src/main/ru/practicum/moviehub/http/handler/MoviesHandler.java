@@ -82,7 +82,7 @@ public class MoviesHandler extends BaseHttpHandler {
                 case "year":
                     if (!validateNumberFormat.test(params.get("year"))) {
                         sendValidationError(exchange, List.of("Некорректный параметр запроса — 'year'"), 400);
-                        break;
+                        return;
                     }
 
                     Integer year = Integer.parseInt(params.get("year"));

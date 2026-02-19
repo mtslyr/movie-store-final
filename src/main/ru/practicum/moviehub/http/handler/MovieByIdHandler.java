@@ -44,6 +44,7 @@ public class MovieByIdHandler extends BaseHttpHandler {
         try {
             if (!validateNumberFormat.test(id)) {
                 sendValidationError(exchange, List.of(INVALID_ID_FORMAT), 422);
+                return;
             }
 
             server.deleteMovie(id);
