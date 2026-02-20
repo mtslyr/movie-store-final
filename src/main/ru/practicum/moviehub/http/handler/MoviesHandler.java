@@ -1,10 +1,7 @@
 package ru.practicum.moviehub.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
-import ru.practicum.moviehub.exception.EmptyMovieTitleException;
-import ru.practicum.moviehub.exception.IllegalMovieYearException;
-import ru.practicum.moviehub.exception.IllegalTitleAndYearException;
-import ru.practicum.moviehub.exception.TooLongMovieTitleException;
+import ru.practicum.moviehub.exception.*;
 import ru.practicum.moviehub.http.BaseHttpHandler;
 import ru.practicum.moviehub.http.MoviesServer;
 import ru.practicum.moviehub.model.Movie;
@@ -50,14 +47,8 @@ public class MoviesHandler extends BaseHttpHandler {
         try {
             Movie saved = server.saveMovie(movieRequest);
             sendJson(exchange, 201, GSON.toJson(saved));
-        } catch (IllegalTitleAndYearException e) {
-            sendValidationError(exchange, List.of(TITLE_SHOULD_NOT_BE_EMPTY, YEAR_SHOULD_BE_BETWEEN), 422);
-        } catch (EmptyMovieTitleException e) {
-            sendValidationError(exchange, List.of(TITLE_SHOULD_NOT_BE_EMPTY), 422);
-        } catch (IllegalMovieYearException e) {
-            sendValidationError(exchange, List.of(YEAR_SHOULD_BE_BETWEEN), 422);
-        } catch (TooLongMovieTitleException e) {
-            sendValidationError(exchange, List.of(TOO_LONG_MOVIE_TITLE), 422);
+        } catch (MovieException e) {
+            sendError(exchange, e);
         }
     }
 
@@ -81,7 +72,7 @@ public class MoviesHandler extends BaseHttpHandler {
             switch (param) {
                 case "year":
                     if (!validateNumberFormat.test(params.get("year"))) {
-                        sendValidationError(exchange, List.of("Некорректный параметр запроса — 'year'"), 400);
+                        sendError(exchange, new MovieException("Ошибка валидации", List.of("Некорректный параметр запроса — 'year'"), 400));
                         return;
                     }
 

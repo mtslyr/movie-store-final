@@ -173,7 +173,7 @@ public class MoviesApiTest {
         List<Integer> ids = movies.stream().map(Movie::getId).toList();
 
         Random random = new Random();
-        int randomId = random.nextInt();
+        int randomId = random.nextInt(0, Integer.MAX_VALUE);
 
         while (ids.contains(randomId)) {
             randomId = random.nextInt();
@@ -195,7 +195,7 @@ public class MoviesApiTest {
 
         assertEquals(
                 error.getError(),
-                "Фильм с ID = %s найден".formatted(randomId)
+                "Фильм с ID = %s не найден".formatted(randomId)
         );
     }
 

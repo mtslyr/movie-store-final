@@ -1,14 +1,15 @@
 package ru.practicum.moviehub.http.handler;
 
 import com.sun.net.httpserver.HttpExchange;
-import ru.practicum.moviehub.api.ErrorResponse;
+import ru.practicum.moviehub.exception.MovieException;
 import ru.practicum.moviehub.http.BaseHttpHandler;
 import ru.practicum.moviehub.http.MoviesServer;
 import ru.practicum.moviehub.model.Movie;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
+
+import static ru.practicum.moviehub.http.MoviesServer.INVALID_ID_FORMAT;
 
 public class MovieByIdHandler extends BaseHttpHandler {
 
@@ -43,35 +44,28 @@ public class MovieByIdHandler extends BaseHttpHandler {
 
         try {
             if (!validateNumberFormat.test(id)) {
-                sendValidationError(exchange, List.of(INVALID_ID_FORMAT), 422);
+                sendError(exchange, new MovieException("Ошибка валидации", List.of(INVALID_ID_FORMAT), 422));
                 return;
             }
-
             server.deleteMovie(id);
             sendNoContent(exchange, 204);
-        } catch (NoSuchElementException e) {
-            ErrorResponse noSuchMovieResponse = new ErrorResponse("Фильм с ID = %s найден".formatted(id));
-            noSuchMovieResponse.setDetails(List.of(NO_SUCH_MOVIE_RESPONSE));
-            String json = GSON.toJson(noSuchMovieResponse);
-            sendJson(exchange, 404, json);
+        } catch (MovieException e) {
+            sendError(exchange, e);
         }
     }
 
     private void handleGetMovie(HttpExchange exchange, String id) throws IOException {
         try {
             if (!validateNumberFormat.test(id)) {
-                sendValidationError(exchange, List.of(INVALID_ID_FORMAT), 400);
+                sendError(exchange, new MovieException("Ошибка валидации", List.of(INVALID_ID_FORMAT), 400));
                 return;
             }
 
             Movie movie = server.getMovie(id);
             String json = GSON.toJson(movie);
             sendJson(exchange, 200, json);
-        } catch (NoSuchElementException e) {
-            ErrorResponse noSuchMovieResponse = new ErrorResponse("Фильм с ID = %s найден".formatted(id));
-            noSuchMovieResponse.setDetails(List.of(NO_SUCH_MOVIE_RESPONSE));
-            String json = GSON.toJson(noSuchMovieResponse);
-            sendJson(exchange, 404, json);
+        } catch (MovieException e) {
+            sendError(exchange, e);
         }
     }
 }

@@ -1,5 +1,6 @@
 package ru.practicum.moviehub.store;
 
+import ru.practicum.moviehub.exception.MovieException;
 import ru.practicum.moviehub.model.Movie;
 
 import java.io.BufferedReader;
@@ -10,6 +11,8 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class MoviesStore {
+
+    protected static final String MOVIE_NOT_FOUND = "Фильм не найден";
     private final Map<Integer, Movie> store;
 
     private int currentId;
@@ -25,11 +28,11 @@ public class MoviesStore {
         readMoviesFromFile(pathToFile);
     }
 
-    public Movie getMovieById(Integer id) throws NoSuchElementException {
+    public Movie getMovieById(Integer id) throws MovieException {
         Movie movie = store.get(id);
 
         if (movie == null) {
-            throw new NoSuchElementException("Фильм не найден");
+            throw new MovieException("Фильм с ID = %d не найден".formatted(id), List.of(MOVIE_NOT_FOUND), 404);
         }
 
         return movie;
@@ -83,14 +86,11 @@ public class MoviesStore {
         store.clear();
     }
 
-    public void deleteById(int id) throws NoSuchElementException {
-        if (!store.containsKey(id)) {
-            throw new NoSuchElementException();
-        }
-
+    public void deleteById(int id) throws MovieException {
         Movie movieToDelete = getMovieById(id);
-
-        store.remove(id);
-        System.out.println("Удален фильм: %s".formatted(movieToDelete));
+        if (movieToDelete != null) {
+            store.remove(id);
+            System.out.println("Удален фильм: %s".formatted(movieToDelete));
+        }
     }
 }

@@ -1,10 +1,7 @@
 package ru.practicum.moviehub.http;
 
 import com.sun.net.httpserver.HttpServer;
-import ru.practicum.moviehub.exception.EmptyMovieTitleException;
-import ru.practicum.moviehub.exception.IllegalMovieYearException;
-import ru.practicum.moviehub.exception.IllegalTitleAndYearException;
-import ru.practicum.moviehub.exception.TooLongMovieTitleException;
+import ru.practicum.moviehub.exception.MovieException;
 import ru.practicum.moviehub.http.handler.MovieByIdHandler;
 import ru.practicum.moviehub.http.handler.MoviesHandler;
 import ru.practicum.moviehub.model.Movie;
@@ -14,12 +11,18 @@ import ru.practicum.moviehub.store.MoviesStore;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
 public class MoviesServer {
+
+    public static final String INVALID_ID_FORMAT = "Некорректный ID";
+    protected static final String TITLE_SHOULD_NOT_BE_EMPTY = "название не должно быть пустым";
+    protected static final String TOO_LONG_MOVIE_TITLE = "название не должно превышать 100 символов";
+    protected static final String YEAR_SHOULD_BE_BETWEEN = "год должен быть между 1888 и %d"
+            .formatted(LocalDate.now().getYear() + 1);
 
     private final MoviesStore moviesStore;
     private final Map<String, BaseHttpHandler> handlers = Map.of(
@@ -64,7 +67,7 @@ public class MoviesServer {
         return moviesStore.getMovies();
     }
 
-    public Movie getMovie(String id) throws NoSuchElementException, NumberFormatException {
+    public Movie getMovie(String id) throws MovieException {
         return moviesStore.getMovieById(Integer.parseInt(id));
     }
 
@@ -72,25 +75,26 @@ public class MoviesServer {
         return moviesStore.getByCondition(predicate);
     }
 
-    public Movie saveMovie(MovieRequest request) throws EmptyMovieTitleException, IllegalMovieYearException, IllegalTitleAndYearException, TooLongMovieTitleException {
-        if (request.getTitle().isEmpty() && !validateMovieYear.test(request)) {
-            throw new IllegalTitleAndYearException();
-        }
+    public Movie saveMovie(MovieRequest request) throws MovieException {
+        List<String> exceptionDetails = new ArrayList<>();
 
         if (request.getTitle().isEmpty()) {
-            throw new EmptyMovieTitleException();
+            exceptionDetails.add(TITLE_SHOULD_NOT_BE_EMPTY);
         }
 
         if (!validateMovieYear.test(request)) {
-            throw new IllegalMovieYearException();
+            exceptionDetails.add(YEAR_SHOULD_BE_BETWEEN);
         }
 
         if (request.getTitle().length() > 100) {
-            throw new TooLongMovieTitleException();
+            exceptionDetails.add(TOO_LONG_MOVIE_TITLE);
         }
 
-
-        return moviesStore.saveMovie(request.getTitle(), request.getYear());
+        if (!exceptionDetails.isEmpty()) {
+            throw new MovieException("Ошибка валидации", exceptionDetails, 422);
+        } else  {
+            return moviesStore.saveMovie(request.getTitle(), request.getYear());
+        }
     }
 
     public void clearStorage() {
@@ -101,7 +105,7 @@ public class MoviesServer {
         this.moviesStore.initTestData();
     }
 
-    public void deleteMovie(String idStr) throws NumberFormatException, NoSuchElementException {
+    public void deleteMovie(String idStr) throws MovieException {
         int id = Integer.parseInt(idStr);
         moviesStore.deleteById(id);
     }

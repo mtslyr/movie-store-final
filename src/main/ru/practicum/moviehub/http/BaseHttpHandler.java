@@ -5,26 +5,17 @@ import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import ru.practicum.moviehub.api.ErrorResponse;
+import ru.practicum.moviehub.exception.MovieException;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.List;
 import java.util.function.Predicate;
 
 public abstract class BaseHttpHandler implements HttpHandler {
 
     protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     protected static final String CT_JSON = "application/json; charset=UTF-8";
-
-    protected static final String NO_SUCH_MOVIE_RESPONSE = "Фильм не найден";
-    protected static final String INVALID_ID_FORMAT = "Некорректный ID";
-
-    protected static final String TITLE_SHOULD_NOT_BE_EMPTY = "название не должно быть пустым";
-    protected static final String TOO_LONG_MOVIE_TITLE = "название не должно превышать 100 символов";
-    protected static final String YEAR_SHOULD_BE_BETWEEN = "год должен быть между 1888 и %d"
-            .formatted(LocalDate.now().getYear() + 1);
 
     protected Predicate<String> validateNumberFormat = s -> s.matches("-?\\d+");
 
@@ -44,11 +35,11 @@ public abstract class BaseHttpHandler implements HttpHandler {
         exchange.sendResponseHeaders(status, -1);
     }
 
-    public void sendValidationError(HttpExchange exchange, List<String> details, int statusCode) throws IOException {
-        ErrorResponse invalidIdFormatResponse = new ErrorResponse("Ошибка валидации");
-        invalidIdFormatResponse.setDetails(details);
-        String json = GSON.toJson(invalidIdFormatResponse);
-        sendJson(exchange, statusCode, json);
+    public void sendError(HttpExchange exchange, MovieException e) throws IOException {
+        ErrorResponse response = new ErrorResponse(e.getMessage());
+        response.setDetails(e.getDetails());
+        String json = GSON.toJson(response);
+        sendJson(exchange, e.getStatusCode(), json);
     }
 
     protected void logRequest(HttpExchange exchange) {
