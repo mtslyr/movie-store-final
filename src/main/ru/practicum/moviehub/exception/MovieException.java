@@ -7,6 +7,7 @@ public class MovieException extends Exception {
     private final List<String> details;
 
     private final int statusCode;
+
     public MovieException(String message, List<String> details, int statusCode) {
         this.details = details;
         this.message = message;
